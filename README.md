@@ -15,4 +15,15 @@ channel往selector里面注册事件（连接，读，写等），也就是告�
 在死循环里面调用selector.select()，这个是阻塞方法，当有通道可以读或者可以写或者可以连接，
 selector就会通知相应的channel可用，然后进行相应的操作。
 
-
+### Selector使用方式  
+* Selector selector = Selector.open();新建一个选择器
+* SocketChannel socketChannel = SocketChannel.open();  socketChannel.configureBlocking(false);
+打开一个客户端的chanel，并设置为非阻塞
+* socketChannel.register(selector, SelectionKey.OP_CONNECT);将这个channel注册到selector中，设置对连接事件感兴趣
+* 在一个死循环中调用selector.select();此方法为阻塞方法，也就是说当没有感兴趣的事件停下来等待，不会造成cpu空转
+* selector.selectedKeys();遍历selector的所有感兴趣事件
+* 如果某个事件是可用的（可读，可写，可连接的），那么client = ((SocketChannel) key.channel());
+通过这个SelectionKey来找到对应的通道，进行相应的操作（读、写、连接）
+### Selector的注销  
+由于Selector的注册是由位标志来记录的，也就是一个数的二进制的表示法，某个位上的值为一表示对某一个事件感兴趣，
+那么注销就可以直接设置感兴趣的值为0，也就是所有的事件都不感兴趣，就将这个channel移出去，代表断开连接
